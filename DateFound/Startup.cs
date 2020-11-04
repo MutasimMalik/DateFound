@@ -1,3 +1,4 @@
+using AutoMapper;
 using DateFound.Data;
 using DateFound.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -28,9 +29,15 @@ namespace DateFound
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<DataContext>(x => x.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson(opt =>
+            {
+                opt.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            });
             services.AddCors();
+            services.AddAutoMapper(typeof(DatingRepository).Assembly);
             services.AddScoped<IAuthRepository, AuthRepository>();
+            services.AddScoped<IDatingRepository, DatingRepository>();
+            services.AddTransient<Seed>();
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -46,7 +53,7 @@ namespace DateFound
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, Seed seeder)
         {
             if (env.IsDevelopment())
             {
@@ -74,6 +81,8 @@ namespace DateFound
             app.UseAuthentication();
 
             app.UseAuthorization();
+
+            //seeder.SeedUsers();
 
             app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
