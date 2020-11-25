@@ -17,6 +17,7 @@ export class MemberEditComponent implements OnInit {
   //if the user is not passed as parameter in reset method, the reset will reset the data as well
   @ViewChild('editForm') editForm: NgForm
   user: User;
+  photoUrl: string;
 
   //Hostlistener to prevent user from closing browser tab
   @HostListener('window:beforeunload', ['$event'])
@@ -32,7 +33,8 @@ export class MemberEditComponent implements OnInit {
   ngOnInit() {
     this.route.data.subscribe(data => {
       this.user = data['user'];
-    })
+    });
+    this.authService.currentPhotoUrl.subscribe(photoUrl => this.photoUrl = photoUrl)
   }
 
   updateUser(){
@@ -42,5 +44,9 @@ export class MemberEditComponent implements OnInit {
     }, error => {
       this.alertify.error(error);
     });  
+  }
+
+  updateMainPhoto(photoUrl){
+    this.user.photoUrl = photoUrl;
   }
 }

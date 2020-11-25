@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 using DateFound.Data;
 using DateFound.Dtos;
 using DateFound.Models;
@@ -16,11 +17,14 @@ namespace DateFound.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
+        private readonly IMapper _mapper;
         private readonly IConfiguration _config;
         private readonly IAuthRepository _repo;
 
-        public AuthController(IAuthRepository repo, IConfiguration config)
+        public AuthController(IAuthRepository repo, IConfiguration config,
+            IMapper mapper)
         {
+            _mapper = mapper;
             _config = config;
             _repo = repo;
         }
@@ -74,9 +78,12 @@ namespace DateFound.Controllers
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
+            var user = _mapper.Map<UserForListDto>(userFromRepo);
+
             return Ok(new
             {
-                token = tokenHandler.WriteToken(token)
+                token = tokenHandler.WriteToken(token),
+                user
             });
         }
     }

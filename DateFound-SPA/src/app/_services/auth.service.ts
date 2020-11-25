@@ -1,31 +1,46 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { JwtHelperService } from '@auth0/angular-jwt';
+import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { User } from '../_models/user';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-baseUrl = environment.apiUrl + 'auth/';
-jwtHelper = new JwtHelperService();
-decodedToken: any;
+  baseUrl = environment.apiUrl + 'auth/';
+  jwtHelper = new JwtHelperService();
+  decodedToken: any;
+  //for showing user image in nav bar
+  currentUser: User;
+  //BehaviorSubject to update user image in navbar
+  photoUrl = new BehaviorSubject<string>('../../assets/user.png');
+  currentPhotoUrl = this.photoUrl.asObservable();
 
-constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) { }
 
-// tslint:disable-next-line: typedef
-login(model: any) {
-  return this.http.post(this.baseUrl + 'login', model).pipe(
-    map((response: any) => {
-      const user = response;
-      if (user) {
-          localStorage.setItem('token', user.token);
-          this.decodedToken = this.jwtHelper.decodeToken(user.token);
-        }
-      })
-    );
+  changeMemberPhoto(photoUrl: string) {
+    this.photoUrl.next(photoUrl);
   }
+
+  // tslint:disable-next-line: typedef
+  login(model: any) {
+    return this.http.post(this.baseUrl + 'login', model).pipe(
+      map((response: any) => {
+        const user = response;
+        if (user) {
+            localStorage.setItem('token', user.token);
+            //json.stringify to convert the object to string
+            localStorage.setItem('user', JSON.stringify(user.user));
+            this.decodedToken = this.jwtHelper.decodeToken(user.token);
+            this.currentUser = user.user;
+            this.changeMemberPhoto(this.currentUser.photoUrl);
+          }
+        })
+      );
+    }
 
   // tslint:disable-next-line: typedef
   register(model: any) {
