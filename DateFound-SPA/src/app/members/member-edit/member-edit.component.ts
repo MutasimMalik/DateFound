@@ -18,6 +18,7 @@ export class MemberEditComponent implements OnInit {
   @ViewChild('editForm') editForm: NgForm
   user: User;
   photoUrl: string;
+  live: true;
 
   //Hostlistener to prevent user from closing browser tab
   @HostListener('window:beforeunload', ['$event'])

@@ -6,12 +6,14 @@ using System.Threading.Tasks;
 using AutoMapper;
 using DateFound.Data;
 using DateFound.Dtos;
+using DateFound.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DateFound.Controllers
 {
+    [ServiceFilter(typeof(LogUserActivity))]
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
